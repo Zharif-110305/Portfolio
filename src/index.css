@@ -7,7 +7,8 @@
 @theme {
   --color-ink: #050505;
   --color-paper: #ffffff;
-  --color-accent: #e60012;
+  --color-accent: #e60012; /* merah terang: label, dialog, popup */
+  --color-band: #7a0c14; /* merah tua: pita diagonal di belakang foto */
   --font-display: "Anton", Impact, "Arial Narrow", sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
@@ -207,12 +208,12 @@ button {
   background: var(--color-ink);
 }
 
-/* pita merah diagonal ala Persona */
+/* pita diagonal ala Persona (merah tua agar tidak menyatu dengan label) */
 .stage__backdrop::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--color-accent);
+  background: var(--color-band);
   clip-path: polygon(0 62%, 100% 36%, 100% 58%, 0 84%);
 }
 
