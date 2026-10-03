@@ -1,7 +1,20 @@
+import { useState } from 'react'
+import { AnimatePresence } from 'motion/react'
+import StartScreen from './components/StartScreen'
+import Stage from './components/Stage'
+
 export default function App() {
+  const [started, setStarted] = useState(false)
+
   return (
-    <main className="grid h-full place-items-center bg-black text-white">
-      <h1 className="text-4xl font-bold text-red-500">Tailwind jalan</h1>
-    </main>
+    <div className="app">
+      <AnimatePresence mode="wait">
+        {started ? (
+          <Stage key="stage" />
+        ) : (
+          <StartScreen key="start" onStart={() => setStarted(true)} />
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
