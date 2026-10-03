@@ -191,7 +191,8 @@ button {
 
 /* =========================================================
    STAGE (panggung)
-   Urutan lapisan: backdrop < tech-bg (0) < dialog (1) < figure (2) < modal (10)
+   Urutan lapisan: backdrop < tech-bg (0) < dialog (1) < figure (2)
+   < modal (10) < efek tembakan (20)
    ========================================================= */
 .stage {
   position: absolute;
@@ -516,6 +517,203 @@ button {
   transform: translateY(calc(var(--t) * -0.05em));
   color: var(--color-paper);
   text-shadow: 0.05em 0.05em 0 var(--color-ink);
+}
+
+/* =========================================================
+   SHOT EFFECT (efek tembakan saat menu diklik)
+   --x, --y : titik klik (diisi dari ShotEffect.jsx)
+   Durasi total diatur di App.jsx (SHOT_DURATION).
+   ========================================================= */
+.app--shake {
+  animation: shot-shake 0.24s linear;
+}
+
+@keyframes shot-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(-6px, 3px);
+  }
+  30% {
+    transform: translate(5px, -4px);
+  }
+  45% {
+    transform: translate(-4px, -2px);
+  }
+  60% {
+    transform: translate(3px, 3px);
+  }
+  80% {
+    transform: translate(-1px, 1px);
+  }
+}
+
+.shot {
+  --burst-size: min(78vmin, 560px);
+
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* kilatan putih layar penuh, sangat singkat */
+.shot__flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  animation: shot-flash 0.34s ease-out forwards;
+}
+
+@keyframes shot-flash {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  16% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* cahaya hangat (putih ke oranye) yang memusat di titik klik */
+.shot__glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform-origin: var(--x) var(--y);
+  background: radial-gradient(
+    circle at var(--x) var(--y),
+    #fff 0,
+    #fff3d6 7%,
+    rgba(255, 190, 110, 0.7) 20%,
+    rgba(255, 110, 40, 0.28) 42%,
+    transparent 70%
+  );
+  animation: shot-glow 0.4s ease-out forwards;
+}
+
+@keyframes shot-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* sinar menyebar berbentuk bintang; dua lapis dengan sudut berbeda */
+.shot__burst,
+.shot__burst::after {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--burst-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+  -webkit-mask-image: radial-gradient(circle, #000 0, #000 14%, transparent 66%);
+  mask-image: radial-gradient(circle, #000 0, #000 14%, transparent 66%);
+}
+
+.shot__burst {
+  background: repeating-conic-gradient(
+    from 6deg,
+    #fff 0 2.5deg,
+    transparent 2.5deg 11deg
+  );
+  animation: shot-burst 0.3s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+.shot__burst::after {
+  content: "";
+  background: repeating-conic-gradient(
+    from 21deg,
+    #ffd9a0 0 1.5deg,
+    transparent 1.5deg 17deg
+  );
+  animation: shot-burst-b 0.3s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes shot-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.15) rotate(8deg);
+  }
+}
+
+@keyframes shot-burst-b {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(0);
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.3) rotate(-10deg);
+  }
+}
+
+/* cincin merah yang melebar */
+.shot__ring {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(var(--burst-size) * 0.6);
+  aspect-ratio: 1;
+  border: max(3px, 0.8vmin) solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.1);
+  animation: shot-ring 0.36s ease-out forwards;
+}
+
+@keyframes shot-ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app--shake {
+    animation: none;
+  }
+
+  .shot {
+    display: none;
+  }
 }
 
 /* =========================================================

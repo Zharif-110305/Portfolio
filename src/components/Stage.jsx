@@ -22,6 +22,15 @@ const MENU = [
 const MENU_START_DELAY = 0.9 // detik, menunggu foto & dialog muncul
 const MENU_STAGGER = 0.14
 
+// Titik efek tembakan: posisi klik; kalau lewat keyboard, tengah elemen.
+function pointFromEvent(event) {
+  if (event.clientX || event.clientY) {
+    return { x: event.clientX, y: event.clientY }
+  }
+  const rect = event.currentTarget.getBoundingClientRect()
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+}
+
 export default function Stage({ onSelect = () => {} }) {
   return (
     <motion.main
@@ -44,7 +53,7 @@ export default function Stage({ onSelect = () => {} }) {
           type="button"
           className="stage__hotspot"
           aria-label="Lihat profil"
-          onClick={() => onSelect('profile')}
+          onClick={(e) => onSelect('profile', pointFromEvent(e))}
         />
 
         <nav className="stage__menu" aria-label="Menu utama">
@@ -55,7 +64,7 @@ export default function Stage({ onSelect = () => {} }) {
               label={item.label}
               side={item.side}
               delay={MENU_START_DELAY + i * MENU_STAGGER}
-              onClick={() => onSelect(item.id)}
+              onClick={(e) => onSelect(item.id, pointFromEvent(e))}
             />
           ))}
         </nav>
