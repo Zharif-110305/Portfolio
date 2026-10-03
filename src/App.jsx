@@ -10,7 +10,8 @@ export default function App() {
     <div className="app">
       <AnimatePresence mode="wait">
         {started ? (
-          <Stage key="stage" />
+          // sementara hanya console.log; di fase berikutnya diganti popup
+          <Stage key="stage" onSelect={(id) => console.log('menu:', id)} />
         ) : (
           <StartScreen key="start" onStart={() => setStarted(true)} />
         )}

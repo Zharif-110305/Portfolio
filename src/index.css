@@ -136,12 +136,13 @@ button {
   clip-path: polygon(0 58%, 100% 32%, 100% 34%, 0 60%);
 }
 
+/* urutan lapisan: backdrop < dialog (1) < foto (2) < menu (3) */
 .stage__photo-btn {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: flex-end;
-  height: min(90dvh, 900px);
+  height: min(72dvh, 700px); /* HP: sisakan ruang untuk dialog di atas */
   max-width: 92vw;
   padding: 0;
   border: 0;
@@ -167,4 +168,166 @@ button {
   border: 2px dashed rgba(255, 255, 255, 0.5);
   letter-spacing: 0.3em;
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* =========================================================
+   DIALOG (bubble ala Persona)
+   ========================================================= */
+.stage__dialog-slot {
+  position: absolute;
+  z-index: 1;
+  top: 3dvh;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dialog {
+  position: relative;
+  width: min(26rem, 84vw);
+  filter: drop-shadow(5px 5px 0 var(--color-accent));
+}
+
+.dialog__name {
+  position: absolute;
+  z-index: 1;
+  top: -0.9em;
+  left: 1rem;
+  padding: 0.2em 1em;
+  background: var(--color-accent);
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: skewX(-12deg);
+}
+
+.dialog__box {
+  padding: 4px;
+  background: var(--color-paper);
+  clip-path: polygon(0 6%, 100% 0, 98% 100%, 2% 94%);
+}
+
+.dialog__text {
+  margin: 0;
+  padding: 1.2rem 1.4rem 1.2rem;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: clamp(0.9rem, 2.6vw, 1.05rem);
+  line-height: 1.55;
+  clip-path: polygon(0 6%, 100% 0, 98% 100%, 2% 94%);
+}
+
+/* teks tak terlihat untuk menjaga tinggi bubble stabil saat mengetik */
+.dialog__typed {
+  position: relative;
+  display: block;
+}
+
+.dialog__ghost {
+  display: block;
+  visibility: hidden;
+}
+
+.dialog__live {
+  position: absolute;
+  inset: 0;
+}
+
+.dialog__cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--color-paper);
+  vertical-align: -0.15em;
+  animation: cursor-blink 0.9s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   MENU (kiri & kanan foto)
+   ========================================================= */
+.stage__menu {
+  position: absolute;
+  z-index: 3;
+  top: 44%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 3dvh, 1.5rem);
+}
+
+.stage__menu--left {
+  left: clamp(0.5rem, 6vw, 10rem);
+  align-items: flex-start;
+}
+
+.stage__menu--right {
+  right: clamp(0.5rem, 6vw, 10rem);
+  align-items: flex-end;
+}
+
+.menu-item {
+  position: relative;
+  isolation: isolate;
+  padding: 0.7em 1.5em;
+  border: 0;
+  background: none;
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 3.2vw, 1.3rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  filter: drop-shadow(4px 4px 0 var(--color-accent));
+  transition: filter 0.15s ease;
+}
+
+.menu-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-ink);
+  border: 3px solid var(--color-paper);
+  transform: skewX(-14deg);
+  transition: background 0.15s ease;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  outline: none;
+  filter: drop-shadow(4px 4px 0 var(--color-paper));
+}
+
+.menu-item:hover::before,
+.menu-item:focus-visible::before {
+  background: var(--color-accent);
+}
+
+/* =========================================================
+   RESPONSIVE: tablet & desktop
+   ========================================================= */
+@media (min-width: 768px) {
+  .stage__photo-btn {
+    height: min(90dvh, 900px);
+  }
+
+  /* dialog bergeser ke kanan kepala supaya teks tidak tertutup foto */
+  .stage__dialog-slot {
+    top: 6dvh;
+    left: calc(50% + clamp(2rem, 9vw, 9rem));
+    right: auto;
+  }
+
+  .stage__menu {
+    top: 40%;
+  }
 }
