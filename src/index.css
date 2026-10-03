@@ -101,7 +101,7 @@ button {
 }
 
 /* =========================================================
-   STAGE (panggung foto)
+   STAGE (panggung)
    ========================================================= */
 .stage {
   position: absolute;
@@ -136,23 +136,36 @@ button {
   clip-path: polygon(0 58%, 100% 32%, 100% 34%, 0 60%);
 }
 
-/* urutan lapisan: backdrop < dialog (1) < foto (2) < menu (3) < modal (10) */
-.stage__photo-btn {
+/* =========================================================
+   FIGURE (foto + label menu satu kelompok)
+   Urutan lapisan di dalamnya:
+   hotspot (0) < label menu (1) < foto (2)
+   Label menu berada DI BELAKANG foto.
+   ========================================================= */
+.stage__figure {
+  /* rasio lebar:tinggi foto (profile.webp). Ubah kalau foto diganti. */
+  --photo-ratio: 749 / 1358;
+  --figure-h: min(64dvh, 700px);
+  --menu-fs: min(calc(var(--figure-h) * 0.045), 3.7vw);
+
   position: relative;
   z-index: 2;
-  display: flex;
-  align-items: flex-end;
-  height: min(72dvh, 700px); /* HP: sisakan ruang untuk dialog di atas */
-  max-width: 92vw;
-  padding: 0;
-  border: 0;
-  background: none;
+  flex-shrink: 0;
+  height: var(--figure-h);
+  aspect-ratio: var(--photo-ratio);
+}
+
+.stage__photo-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none; /* klik diteruskan ke label / hotspot di bawahnya */
 }
 
 .stage__photo {
+  display: block;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: 100%;
   object-fit: contain;
   object-position: bottom;
   user-select: none;
@@ -163,11 +176,28 @@ button {
 .stage__photo-placeholder {
   display: grid;
   place-items: center;
+  width: 100%;
   height: 100%;
-  aspect-ratio: 3 / 4;
   border: 2px dashed rgba(255, 255, 255, 0.5);
   letter-spacing: 0.3em;
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* area klik easter egg (profil), hanya bagian tengah foto */
+.stage__hotspot {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: 14%;
+  right: 14%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.stage__hotspot:focus-visible {
+  outline: 2px dashed var(--color-paper);
 }
 
 /* =========================================================
@@ -254,42 +284,82 @@ button {
 }
 
 /* =========================================================
-   MENU (kiri & kanan foto)
+   MENU (label di belakang foto, tidak beraturan)
+   Per label (lihat .menu-slot[data-id] di bawah):
+   --at    : titik ujung label yang terselip ke badan (% lebar foto)
+   --top   : ketinggian (% tinggi foto)
+   --rot   : sudut miring
+   --scale : ukuran relatif
    ========================================================= */
 .stage__menu {
+  display: contents;
+}
+
+.menu-slot {
   position: absolute;
-  z-index: 3;
-  top: 44%;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.75rem, 3dvh, 1.5rem);
+  z-index: 1;
+  top: var(--top);
+  font-size: var(--menu-fs);
+  transform: rotate(var(--rot)) scale(var(--scale));
 }
 
-.stage__menu--left {
-  left: clamp(0.5rem, 6vw, 10rem);
-  align-items: flex-start;
+/* label kiri: ujung KANAN terselip di balik badan */
+.menu-slot[data-side="left"] {
+  right: calc(100% - var(--at));
 }
 
-.stage__menu--right {
-  right: clamp(0.5rem, 6vw, 10rem);
-  align-items: flex-end;
+/* label kanan: ujung KIRI terselip di balik badan */
+.menu-slot[data-side="right"] {
+  left: var(--at);
+}
+
+/* posisi tiap label, versi HP (portrait) */
+.menu-slot[data-id="education"] {
+  --at: 38%;
+  --top: 17%;
+  --rot: -7deg;
+  --scale: 1.06;
+}
+
+.menu-slot[data-id="photography"] {
+  --at: 56%;
+  --top: 8%;
+  --rot: 5deg;
+  --scale: 1;
+}
+
+.menu-slot[data-id="projects"] {
+  --at: 27%;
+  --top: 50%;
+  --rot: 6deg;
+  --scale: 0.94;
+}
+
+.menu-slot[data-id="contact"] {
+  --at: 66%;
+  --top: 80%;
+  --rot: -6deg;
+  --scale: 1.08;
 }
 
 .menu-item {
   position: relative;
   isolation: isolate;
-  padding: 0.7em 1.5em;
+  display: block;
+  padding: 0.8em 1.2em;
   border: 0;
   background: none;
   color: var(--color-paper);
   font-family: var(--font-display);
-  font-size: clamp(0.8rem, 3.2vw, 1.3rem);
-  letter-spacing: 0.08em;
+  font-size: 1em;
+  font-style: italic;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  filter: drop-shadow(4px 4px 0 var(--color-accent));
-  transition: filter 0.15s ease;
+  white-space: nowrap;
+  text-shadow: 2px 2px 0 var(--color-accent);
 }
 
+/* pita hitam bergaris putih */
 .menu-item::before {
   content: "";
   position: absolute;
@@ -301,15 +371,31 @@ button {
   transition: background 0.15s ease;
 }
 
+/* bayangan merah, miringnya sedikit berbeda supaya terlihat timbul */
+.menu-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: var(--color-accent);
+  transform: translate(0.3em, 0.3em) skewX(-20deg);
+  transition: background 0.15s ease;
+}
+
 .menu-item:hover,
 .menu-item:focus-visible {
   outline: none;
-  filter: drop-shadow(4px 4px 0 var(--color-paper));
+  text-shadow: 2px 2px 0 var(--color-ink);
 }
 
 .menu-item:hover::before,
 .menu-item:focus-visible::before {
   background: var(--color-accent);
+}
+
+.menu-item:hover::after,
+.menu-item:focus-visible::after {
+  background: var(--color-paper);
 }
 
 /* =========================================================
@@ -600,8 +686,13 @@ button {
    RESPONSIVE: tablet & desktop
    ========================================================= */
 @media (min-width: 768px) {
-  .stage__photo-btn {
-    height: min(90dvh, 900px);
+  .stage__figure {
+    --figure-h: min(90dvh, 900px);
+    --menu-fs: min(clamp(1rem, calc(var(--figure-h) * 0.04), 2.1rem), 3.4vw);
+  }
+
+  .menu-item {
+    padding: 0.8em 1.4em;
   }
 
   /* dialog bergeser ke kanan kepala supaya teks tidak tertutup foto */
@@ -611,7 +702,28 @@ button {
     right: auto;
   }
 
-  .stage__menu {
-    top: 40%;
+  /* posisi tiap label, versi tablet & desktop */
+  .menu-slot[data-id="education"] {
+    --at: 38%;
+    --top: 19%;
+    --rot: -7deg;
+  }
+
+  .menu-slot[data-id="photography"] {
+    --at: 62%;
+    --top: 24%;
+    --rot: 6deg;
+  }
+
+  .menu-slot[data-id="projects"] {
+    --at: 27%;
+    --top: 52%;
+    --rot: 6deg;
+  }
+
+  .menu-slot[data-id="contact"] {
+    --at: 78%;
+    --top: 66%;
+    --rot: -5deg;
   }
 }

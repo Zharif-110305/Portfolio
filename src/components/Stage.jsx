@@ -11,17 +11,15 @@ const photoModules = import.meta.glob('../assets/images/profile.*', {
 })
 const profilePhoto = Object.values(photoModules)[0] ?? null
 
-const LEFT_MENU = [
-  { id: 'education', label: 'Education' },
-  { id: 'projects', label: 'Project' },
-]
-const RIGHT_MENU = [
-  { id: 'photography', label: 'Photography' },
-  { id: 'contact', label: 'Contact' },
+const MENU = [
+  { id: 'education', label: 'Education', side: 'left' },
+  { id: 'projects', label: 'Project', side: 'left' },
+  { id: 'photography', label: 'Photography', side: 'right' },
+  { id: 'contact', label: 'Contact', side: 'right' },
 ]
 
-const MENU_START_DELAY = 1.0 // detik, menunggu foto & dialog muncul
-const MENU_STAGGER = 0.12
+const MENU_START_DELAY = 0.9 // detik, menunggu foto & dialog muncul
+const MENU_STAGGER = 0.14
 
 export default function Stage({ onSelect = () => {} }) {
   return (
@@ -38,50 +36,46 @@ export default function Stage({ onSelect = () => {} }) {
         <DialogBubble speaker={profile.name} lines={profile.dialogLines} />
       </div>
 
-      <motion.button
-        type="button"
-        className="stage__photo-btn"
-        aria-label="Lihat profil"
-        onClick={() => onSelect('profile')}
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 120, damping: 18 }}
-      >
-        {profilePhoto ? (
-          <img
-            className="stage__photo"
-            src={profilePhoto}
-            alt="Foto profil"
-            draggable="false"
-          />
-        ) : (
-          <div className="stage__photo-placeholder">PHOTO</div>
-        )}
-      </motion.button>
+      {/* foto + label menu satu kelompok; urutan lapisan diatur di CSS */}
+      <div className="stage__figure">
+        <button
+          type="button"
+          className="stage__hotspot"
+          aria-label="Lihat profil"
+          onClick={() => onSelect('profile')}
+        />
 
-      <nav className="stage__menu stage__menu--left" aria-label="Menu kiri">
-        {LEFT_MENU.map((item, i) => (
-          <MenuItem
-            key={item.id}
-            label={item.label}
-            side="left"
-            delay={MENU_START_DELAY + i * MENU_STAGGER}
-            onClick={() => onSelect(item.id)}
-          />
-        ))}
-      </nav>
+        <nav className="stage__menu" aria-label="Menu utama">
+          {MENU.map((item, i) => (
+            <MenuItem
+              key={item.id}
+              id={item.id}
+              label={item.label}
+              side={item.side}
+              delay={MENU_START_DELAY + i * MENU_STAGGER}
+              onClick={() => onSelect(item.id)}
+            />
+          ))}
+        </nav>
 
-      <nav className="stage__menu stage__menu--right" aria-label="Menu kanan">
-        {RIGHT_MENU.map((item, i) => (
-          <MenuItem
-            key={item.id}
-            label={item.label}
-            side="right"
-            delay={MENU_START_DELAY + i * MENU_STAGGER}
-            onClick={() => onSelect(item.id)}
-          />
-        ))}
-      </nav>
+        <motion.div
+          className="stage__photo-wrap"
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 120, damping: 18 }}
+        >
+          {profilePhoto ? (
+            <img
+              className="stage__photo"
+              src={profilePhoto}
+              alt="Foto profil"
+              draggable="false"
+            />
+          ) : (
+            <div className="stage__photo-placeholder">PHOTO</div>
+          )}
+        </motion.div>
+      </div>
     </motion.main>
   )
 }
