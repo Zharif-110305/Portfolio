@@ -234,12 +234,12 @@ button {
 .stage__figure {
   /* lebar : tinggi foto (profile.webp = 749 / 1358). Ubah kalau foto diganti. */
   --photo-aspect: 0.5516;
-  --figure-h: min(64dvh, 700px);
+  --figure-h: min(66dvh, 720px);
   --figure-w: calc(var(--figure-h) * var(--photo-aspect));
   /* titik pusat tempat semua label "mengarah" (% tinggi foto) */
-  --cy: 0.2;
+  --cy: 0.14;
   /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
-  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.2vw);
+  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.9vw);
 
   position: relative;
   z-index: 2;
@@ -393,7 +393,7 @@ button {
 }
 
 .menu-slot {
-  --aim: 0.6;
+  --aim: 0.75;
   --scale: 1;
   --px: calc(var(--figure-w) * var(--ix));
   --py: calc(var(--figure-h) * var(--iy));
@@ -426,27 +426,25 @@ button {
   transform: translateY(-50%) rotate(var(--rot)) scale(var(--scale));
 }
 
-/* posisi tiap label, versi HP (mengelilingi kepala dan bahu) */
+/* posisi tiap label, versi HP: mengelilingi kepala secara simetris */
 .menu-slot[data-id="education"] {
-  --ix: 0.38;
-  --iy: 0.07;
-  --scale: 1.04;
+  --ix: 0.39;
+  --iy: 0.06;
 }
 
 .menu-slot[data-id="photography"] {
-  --ix: 0.62;
-  --iy: 0.03;
+  --ix: 0.61;
+  --iy: 0.06;
 }
 
 .menu-slot[data-id="projects"] {
-  --ix: 0.18;
-  --iy: 0.28;
-  --scale: 0.96;
+  --ix: 0.33;
+  --iy: 0.19;
 }
 
 .menu-slot[data-id="contact"] {
-  --ix: 0.83;
-  --iy: 0.31;
+  --ix: 0.67;
+  --iy: 0.19;
 }
 
 .menu-item {
@@ -516,8 +514,6 @@ button {
   font-size: calc(1em * (0.86 + 0.34 * var(--t)));
   transform: translateY(calc(var(--t) * -0.05em));
   color: var(--color-paper);
-  -webkit-text-stroke: 0.06em var(--color-ink);
-  paint-order: stroke fill;
   text-shadow: 0.05em 0.05em 0 var(--color-ink);
 }
 
