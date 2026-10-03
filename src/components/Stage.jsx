@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import DialogBubble from './DialogBubble'
 import MenuItem from './MenuItem'
+import TechBackground from './TechBackground'
 import { profile } from '../data/profile'
 
 // Mengambil src/assets/images/profile.* (png/webp/jpg).
@@ -31,6 +32,7 @@ export default function Stage({ onSelect = () => {} }) {
       transition={{ duration: 0.5 }}
     >
       <div className="stage__backdrop" />
+      <TechBackground />
 
       <div className="stage__dialog-slot">
         <DialogBubble speaker={profile.name} lines={profile.dialogLines} />

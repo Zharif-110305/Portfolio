@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource/anton/400.css";
 
 /* =========================================================
    THEME (token warna & font, ubah di sini untuk ganti tema)
@@ -7,7 +8,7 @@
   --color-ink: #050505;
   --color-paper: #ffffff;
   --color-accent: #e60012;
-  --font-display: "Arial Black", Impact, system-ui, sans-serif;
+  --font-display: "Anton", Impact, "Arial Narrow", sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
@@ -45,6 +46,91 @@ button {
 }
 
 /* =========================================================
+   TECH BACKGROUND (logo bahasa pemrograman, selang-seling)
+   Baris ganjil bergerak ke kiri, baris genap ke kanan.
+   Ubah opacity / blur di sini untuk mengatur kehalusannya.
+   ========================================================= */
+.tech-bg {
+  --logo-size: clamp(2rem, 6.5dvh, 4rem);
+  --logo-gap: calc(var(--logo-size) * 1.3);
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--color-paper);
+  opacity: 0.13;
+}
+
+.tech-row {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tech-track {
+  display: flex;
+  flex-shrink: 0;
+  width: max-content;
+  gap: var(--logo-gap);
+  padding-right: var(--logo-gap); /* agar -50% pas satu set penuh */
+  filter: blur(2px);
+  will-change: transform;
+  animation: tech-left var(--dur, 80s) linear infinite;
+}
+
+.tech-row:nth-child(even) .tech-track {
+  animation-name: tech-right;
+}
+
+/* kecepatan tiap baris dibuat berbeda */
+.tech-row:nth-child(3n + 1) {
+  --dur: 90s;
+}
+
+.tech-row:nth-child(3n + 2) {
+  --dur: 70s;
+}
+
+.tech-row:nth-child(3n) {
+  --dur: 110s;
+}
+
+.tech-logo {
+  flex-shrink: 0;
+  width: var(--logo-size);
+  height: var(--logo-size);
+}
+
+@keyframes tech-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes tech-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-track {
+    animation: none;
+  }
+}
+
+/* =========================================================
    START SCREEN
    ========================================================= */
 .start-screen {
@@ -58,6 +144,8 @@ button {
 }
 
 .start-button {
+  position: relative;
+  z-index: 1;
   background: transparent;
   color: var(--color-paper);
   border: 2px solid var(--color-paper);
@@ -102,6 +190,7 @@ button {
 
 /* =========================================================
    STAGE (panggung)
+   Urutan lapisan: backdrop < tech-bg (0) < dialog (1) < figure (2) < modal (10)
    ========================================================= */
 .stage {
   position: absolute;
@@ -143,17 +232,20 @@ button {
    Label menu berada DI BELAKANG foto.
    ========================================================= */
 .stage__figure {
-  /* rasio lebar:tinggi foto (profile.webp). Ubah kalau foto diganti. */
-  --photo-ratio: 749 / 1358;
+  /* lebar : tinggi foto (profile.webp = 749 / 1358). Ubah kalau foto diganti. */
+  --photo-aspect: 0.5516;
   --figure-h: min(64dvh, 700px);
+  --figure-w: calc(var(--figure-h) * var(--photo-aspect));
+  /* titik pusat tempat semua label "mengarah" (% tinggi foto) */
+  --cy: 0.2;
   /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
-  --menu-fs: min(calc(var(--figure-h) * 0.05), 3.9vw);
+  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.2vw);
 
   position: relative;
   z-index: 2;
   flex-shrink: 0;
+  width: var(--figure-w);
   height: var(--figure-h);
-  aspect-ratio: var(--photo-ratio);
 }
 
 .stage__photo-wrap {
@@ -285,100 +377,115 @@ button {
 }
 
 /* =========================================================
-   MENU (label di belakang foto, menyebar dari tengah badan)
+   MENU (label di belakang foto, semuanya mengarah ke tengah)
+
    Per label (lihat .menu-slot[data-id] di bawah):
-   --at    : titik ujung label yang terselip ke badan (% lebar foto)
-   --top   : ketinggian (% tinggi foto, boleh negatif = di atas foto)
-   --rot   : sudut miring
-   --scale : ukuran relatif
+   --ix, --iy : titik ujung label yang menyentuh badan, sebagai
+                pecahan lebar (--ix) dan tinggi (--iy) foto.
+                Sudut miring dihitung otomatis supaya label
+                mengarah ke pusat foto.
+   --aim      : seberapa penuh label menghadap pusat (1 = tepat,
+                lebih kecil = lebih landai)
+   --scale    : ukuran relatif
    ========================================================= */
 .stage__menu {
   display: contents;
 }
 
 .menu-slot {
+  --aim: 0.6;
+  --scale: 1;
+  --px: calc(var(--figure-w) * var(--ix));
+  --py: calc(var(--figure-h) * var(--iy));
+  --cxp: calc(var(--figure-w) * 0.5);
+  --cyp: calc(var(--figure-h) * var(--cy));
+
   position: absolute;
   z-index: 1;
-  top: var(--top);
+  top: var(--py);
   font-size: var(--menu-fs);
-  transform: rotate(var(--rot)) scale(var(--scale));
 }
 
-/* label kiri: ujung KANAN terselip di balik badan */
+/* label kiri: ujung KANAN di badan, dibaca menuju pusat */
 .menu-slot[data-side="left"] {
-  right: calc(100% - var(--at));
+  --rot: calc(
+    var(--aim) * atan2(calc(var(--cyp) - var(--py)), calc(var(--cxp) - var(--px)))
+  );
+  right: calc(var(--figure-w) - var(--px));
+  transform-origin: 100% 50%;
+  transform: translateY(-50%) rotate(var(--rot)) scale(var(--scale));
 }
 
-/* label kanan: ujung KIRI terselip di balik badan */
+/* label kanan: ujung KIRI di badan, dibaca menjauh dari pusat */
 .menu-slot[data-side="right"] {
-  left: var(--at);
+  --rot: calc(
+    var(--aim) * atan2(calc(var(--py) - var(--cyp)), calc(var(--px) - var(--cxp)))
+  );
+  left: var(--px);
+  transform-origin: 0 50%;
+  transform: translateY(-50%) rotate(var(--rot)) scale(var(--scale));
 }
 
-/* posisi tiap label, versi HP (mengelilingi kepala) */
+/* posisi tiap label, versi HP (mengelilingi kepala dan bahu) */
 .menu-slot[data-id="education"] {
-  --at: 44%;
-  --top: -2%;
-  --rot: 8deg;
-  --scale: 1.05;
+  --ix: 0.38;
+  --iy: 0.07;
+  --scale: 1.04;
 }
 
 .menu-slot[data-id="photography"] {
-  --at: 60%;
-  --top: -14%;
-  --rot: -8deg;
-  --scale: 1;
+  --ix: 0.62;
+  --iy: 0.03;
 }
 
 .menu-slot[data-id="projects"] {
-  --at: 33%;
-  --top: 16%;
-  --rot: -7deg;
-  --scale: 0.95;
+  --ix: 0.18;
+  --iy: 0.28;
+  --scale: 0.96;
 }
 
 .menu-slot[data-id="contact"] {
-  --at: 66%;
-  --top: 10%;
-  --rot: 8deg;
-  --scale: 1.05;
+  --ix: 0.83;
+  --iy: 0.31;
 }
 
 .menu-item {
   position: relative;
   isolation: isolate;
   display: block;
-  padding: 0.75em 1em 0.75em 0.9em;
+  padding: 0.5em 0.9em 0.45em 0.7em;
   border: 0;
   background: none;
   color: var(--color-paper);
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: 400; /* Anton hanya punya satu ketebalan */
   font-size: 1em;
-  font-style: italic;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* pita hitam berbentuk baji: makin tinggi ke arah huruf terakhir */
+/* pita hitam: sedikit baji, makin tinggi ke arah huruf terakhir */
 .menu-item::before {
   content: "";
   position: absolute;
-  inset: 8% 0;
+  inset: 0;
   z-index: -1;
   background: var(--color-ink);
-  clip-path: polygon(0 34%, 97% 0, 100% 100%, 3% 66%);
+  clip-path: polygon(0 16%, 100% 0, 100% 84%, 0 100%);
   transition: background 0.15s ease;
 }
 
-/* serpihan merah di belakang pita (efek timbul) */
+/* salinan merah bergeser sedikit = efek timbul */
 .menu-item::after {
   content: "";
   position: absolute;
-  inset: -4% -3% -4% -2%;
+  inset: 0;
   z-index: -2;
   background: var(--color-accent);
-  clip-path: polygon(0 44%, 100% 4%, 96% 100%, 4% 78%);
+  clip-path: polygon(0 16%, 100% 0, 100% 84%, 0 100%);
+  transform: translate(0.22em, 0.22em);
   transition: background 0.15s ease;
 }
 
@@ -403,16 +510,15 @@ button {
 }
 
 /* --t = 0 (huruf pertama) sampai 1 (huruf terakhir):
-   ukuran membesar, naik sedikit, dan miring bertahap */
+   huruf membesar bertahap dan naik sedikit */
 .menu-letter {
   display: inline-block;
-  font-size: calc(1em * (0.72 + 0.7 * var(--t)));
-  transform: translateY(calc(var(--t) * -0.08em))
-    rotate(calc((var(--t) - 0.5) * -5deg));
+  font-size: calc(1em * (0.86 + 0.34 * var(--t)));
+  transform: translateY(calc(var(--t) * -0.05em));
   color: var(--color-paper);
-  -webkit-text-stroke: 0.1em var(--color-ink);
+  -webkit-text-stroke: 0.06em var(--color-ink);
   paint-order: stroke fill;
-  text-shadow: 0.07em 0.07em 0 var(--color-ink);
+  text-shadow: 0.05em 0.05em 0 var(--color-ink);
 }
 
 /* =========================================================
@@ -524,6 +630,8 @@ button {
   margin: 0.5rem 0 0.1rem;
   font-family: var(--font-display);
   font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -558,6 +666,8 @@ button {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -673,6 +783,7 @@ button {
 
 .contact-link__label {
   font-family: var(--font-display);
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -705,11 +816,12 @@ button {
 @media (min-width: 768px) {
   .stage__figure {
     --figure-h: min(90dvh, 900px);
-    --menu-fs: min(clamp(1rem, calc(var(--figure-h) * 0.04), 2.1rem), 3.4vw);
+    --cy: 0.4;
+    --menu-fs: min(clamp(1.1rem, calc(var(--figure-h) * 0.05), 2.8rem), 4vw);
   }
 
-  .menu-item {
-    padding: 0.75em 1.1em 0.75em 1em;
+  .menu-slot {
+    --aim: 0.85;
   }
 
   /* dialog bergeser ke kanan kepala; lebarnya dibatasi agar tidak terpotong */
@@ -725,26 +837,22 @@ button {
 
   /* posisi tiap label, versi tablet & desktop (menyebar dari tengah badan) */
   .menu-slot[data-id="education"] {
-    --at: 30%;
-    --top: 17%;
-    --rot: 7deg;
+    --ix: 0.23;
+    --iy: 0.32;
   }
 
   .menu-slot[data-id="photography"] {
-    --at: 60%;
-    --top: 11%;
-    --rot: -8deg;
+    --ix: 0.79;
+    --iy: 0.34;
   }
 
   .menu-slot[data-id="projects"] {
-    --at: 22%;
-    --top: 55%;
-    --rot: -7deg;
+    --ix: 0.21;
+    --iy: 0.52;
   }
 
   .menu-slot[data-id="contact"] {
-    --at: 78%;
-    --top: 71%;
-    --rot: 8deg;
+    --ix: 0.93;
+    --iy: 0.58;
   }
 }
