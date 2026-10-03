@@ -136,7 +136,7 @@ button {
   clip-path: polygon(0 58%, 100% 32%, 100% 34%, 0 60%);
 }
 
-/* urutan lapisan: backdrop < dialog (1) < foto (2) < menu (3) */
+/* urutan lapisan: backdrop < dialog (1) < foto (2) < menu (3) < modal (10) */
 .stage__photo-btn {
   position: relative;
   z-index: 2;
@@ -310,6 +310,290 @@ button {
 .menu-item:hover::before,
 .menu-item:focus-visible::before {
   background: var(--color-accent);
+}
+
+/* =========================================================
+   MODAL (popup)
+   ========================================================= */
+.modal {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.5rem, 3vw, 2rem);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.modal__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(52rem, 100%);
+  max-height: 100%;
+  background: var(--color-ink);
+  border: 3px solid var(--color-paper);
+  box-shadow: 8px 8px 0 var(--color-accent);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem 0.75rem 1.5rem;
+  background: var(--color-accent);
+}
+
+.modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modal__close {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 1.2rem;
+  font-weight: 900;
+  transform: skewX(-12deg);
+}
+
+.modal__close:hover,
+.modal__close:focus-visible {
+  outline: 2px solid var(--color-paper);
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.modal__body {
+  min-height: 0;
+  padding: 1.25rem 1.5rem 1.75rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+/* ---------- Education (timeline) ---------- */
+.timeline {
+  display: grid;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0 0 0 1.25rem;
+  border-left: 3px solid var(--color-accent);
+  list-style: none;
+}
+
+.timeline__item {
+  position: relative;
+}
+
+.timeline__item::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: calc(-1.25rem - 9px);
+  width: 15px;
+  height: 15px;
+  background: var(--color-paper);
+  transform: rotate(45deg);
+}
+
+.timeline__period {
+  display: inline-block;
+  padding: 0.1em 0.7em;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transform: skewX(-12deg);
+}
+
+.timeline__title {
+  margin: 0.5rem 0 0.1rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+.timeline__place {
+  margin: 0;
+  font-weight: 700;
+}
+
+.timeline__desc {
+  margin: 0.5rem 0 0;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* ---------- Project (kartu) ---------- */
+.card-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  border: 2px solid var(--color-paper);
+  box-shadow: 5px 5px 0 var(--color-accent);
+}
+
+.card__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.card__desc {
+  flex: 1;
+  margin: 0;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  padding: 0.15em 0.6em;
+  border: 1px solid var(--color-paper);
+  font-size: 0.75rem;
+}
+
+.card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.btn-link {
+  padding: 0.4em 1em;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: skewX(-12deg);
+}
+
+.btn-link:hover,
+.btn-link:focus-visible {
+  outline: none;
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* ---------- Photography (galeri) ---------- */
+.gallery {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+
+.gallery__item {
+  margin: 0;
+  border: 2px solid var(--color-paper);
+  background: #111;
+}
+
+.gallery__img,
+.gallery__nosignal {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.gallery__nosignal {
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(135deg, #111 0 10px, #1b1b1b 10px 20px);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+}
+
+.gallery__caption {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+/* ---------- Contact ---------- */
+.contact-list {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid var(--color-paper);
+  box-shadow: 5px 5px 0 var(--color-accent);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.contact-link:hover,
+.contact-link:focus-visible {
+  outline: none;
+  background: var(--color-accent);
+  transform: translate(-2px, -2px);
+}
+
+.contact-link__label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.contact-link__value {
+  font-size: 0.85rem;
+  text-align: right;
+  word-break: break-all;
+  opacity: 0.85;
+}
+
+/* ---------- Profile (easter egg) ---------- */
+.profile__role {
+  display: inline-block;
+  margin: 0 0 1rem;
+  padding: 0.2em 0.9em;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 700;
+  transform: skewX(-12deg);
+}
+
+.profile__text {
+  margin: 0 0 1rem;
+  line-height: 1.7;
 }
 
 /* =========================================================

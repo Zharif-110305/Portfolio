@@ -42,6 +42,7 @@ export default function Stage({ onSelect = () => {} }) {
         type="button"
         className="stage__photo-btn"
         aria-label="Lihat profil"
+        onClick={() => onSelect('profile')}
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 120, damping: 18 }}
