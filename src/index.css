@@ -146,7 +146,8 @@ button {
   /* rasio lebar:tinggi foto (profile.webp). Ubah kalau foto diganti. */
   --photo-ratio: 749 / 1358;
   --figure-h: min(64dvh, 700px);
-  --menu-fs: min(calc(var(--figure-h) * 0.045), 3.7vw);
+  /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
+  --menu-fs: min(calc(var(--figure-h) * 0.05), 3.9vw);
 
   position: relative;
   z-index: 2;
@@ -284,10 +285,10 @@ button {
 }
 
 /* =========================================================
-   MENU (label di belakang foto, tidak beraturan)
+   MENU (label di belakang foto, menyebar dari tengah badan)
    Per label (lihat .menu-slot[data-id] di bawah):
    --at    : titik ujung label yang terselip ke badan (% lebar foto)
-   --top   : ketinggian (% tinggi foto)
+   --top   : ketinggian (% tinggi foto, boleh negatif = di atas foto)
    --rot   : sudut miring
    --scale : ukuran relatif
    ========================================================= */
@@ -313,79 +314,77 @@ button {
   left: var(--at);
 }
 
-/* posisi tiap label, versi HP (portrait) */
+/* posisi tiap label, versi HP (mengelilingi kepala) */
 .menu-slot[data-id="education"] {
-  --at: 38%;
-  --top: 17%;
-  --rot: -7deg;
-  --scale: 1.06;
+  --at: 44%;
+  --top: -2%;
+  --rot: 8deg;
+  --scale: 1.05;
 }
 
 .menu-slot[data-id="photography"] {
-  --at: 56%;
-  --top: 8%;
-  --rot: 5deg;
+  --at: 60%;
+  --top: -14%;
+  --rot: -8deg;
   --scale: 1;
 }
 
 .menu-slot[data-id="projects"] {
-  --at: 27%;
-  --top: 50%;
-  --rot: 6deg;
-  --scale: 0.94;
+  --at: 33%;
+  --top: 16%;
+  --rot: -7deg;
+  --scale: 0.95;
 }
 
 .menu-slot[data-id="contact"] {
   --at: 66%;
-  --top: 80%;
-  --rot: -6deg;
-  --scale: 1.08;
+  --top: 10%;
+  --rot: 8deg;
+  --scale: 1.05;
 }
 
 .menu-item {
   position: relative;
   isolation: isolate;
   display: block;
-  padding: 0.8em 1.2em;
+  padding: 0.75em 1em 0.75em 0.9em;
   border: 0;
   background: none;
   color: var(--color-paper);
   font-family: var(--font-display);
+  font-weight: 900;
   font-size: 1em;
   font-style: italic;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 2px 2px 0 var(--color-accent);
 }
 
-/* pita hitam bergaris putih */
+/* pita hitam berbentuk baji: makin tinggi ke arah huruf terakhir */
 .menu-item::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 8% 0;
   z-index: -1;
   background: var(--color-ink);
-  border: 3px solid var(--color-paper);
-  transform: skewX(-14deg);
+  clip-path: polygon(0 34%, 97% 0, 100% 100%, 3% 66%);
   transition: background 0.15s ease;
 }
 
-/* bayangan merah, miringnya sedikit berbeda supaya terlihat timbul */
+/* serpihan merah di belakang pita (efek timbul) */
 .menu-item::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -4% -3% -4% -2%;
   z-index: -2;
   background: var(--color-accent);
-  transform: translate(0.3em, 0.3em) skewX(-20deg);
+  clip-path: polygon(0 44%, 100% 4%, 96% 100%, 4% 78%);
   transition: background 0.15s ease;
 }
 
 .menu-item:hover,
 .menu-item:focus-visible {
   outline: none;
-  text-shadow: 2px 2px 0 var(--color-ink);
 }
 
 .menu-item:hover::before,
@@ -396,6 +395,24 @@ button {
 .menu-item:hover::after,
 .menu-item:focus-visible::after {
   background: var(--color-paper);
+}
+
+.menu-label {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+/* --t = 0 (huruf pertama) sampai 1 (huruf terakhir):
+   ukuran membesar, naik sedikit, dan miring bertahap */
+.menu-letter {
+  display: inline-block;
+  font-size: calc(1em * (0.72 + 0.7 * var(--t)));
+  transform: translateY(calc(var(--t) * -0.08em))
+    rotate(calc((var(--t) - 0.5) * -5deg));
+  color: var(--color-paper);
+  -webkit-text-stroke: 0.1em var(--color-ink);
+  paint-order: stroke fill;
+  text-shadow: 0.07em 0.07em 0 var(--color-ink);
 }
 
 /* =========================================================
@@ -692,38 +709,42 @@ button {
   }
 
   .menu-item {
-    padding: 0.8em 1.4em;
+    padding: 0.75em 1.1em 0.75em 1em;
   }
 
-  /* dialog bergeser ke kanan kepala supaya teks tidak tertutup foto */
+  /* dialog bergeser ke kanan kepala; lebarnya dibatasi agar tidak terpotong */
+  .dialog {
+    width: min(26rem, calc(50vw - clamp(2rem, 9vw, 9rem) - 1rem));
+  }
+
   .stage__dialog-slot {
     top: 6dvh;
     left: calc(50% + clamp(2rem, 9vw, 9rem));
     right: auto;
   }
 
-  /* posisi tiap label, versi tablet & desktop */
+  /* posisi tiap label, versi tablet & desktop (menyebar dari tengah badan) */
   .menu-slot[data-id="education"] {
-    --at: 38%;
-    --top: 19%;
-    --rot: -7deg;
+    --at: 30%;
+    --top: 17%;
+    --rot: 7deg;
   }
 
   .menu-slot[data-id="photography"] {
-    --at: 62%;
-    --top: 24%;
-    --rot: 6deg;
+    --at: 60%;
+    --top: 11%;
+    --rot: -8deg;
   }
 
   .menu-slot[data-id="projects"] {
-    --at: 27%;
-    --top: 52%;
-    --rot: 6deg;
+    --at: 22%;
+    --top: 55%;
+    --rot: -7deg;
   }
 
   .menu-slot[data-id="contact"] {
     --at: 78%;
-    --top: 66%;
-    --rot: -5deg;
+    --top: 71%;
+    --rot: 8deg;
   }
 }
