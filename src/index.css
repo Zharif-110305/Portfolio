@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "@fontsource/anton/400.css";
+@import "@fontsource/abril-fatface/400.css";
+@import "@fontsource/alfa-slab-one/400.css";
+@import "@fontsource/archivo-black/400.css";
 
 /* =========================================================
    THEME (token warna & font, ubah di sini untuk ganti tema)
@@ -10,6 +13,9 @@
   --color-accent: #e60012; /* merah terang: label, dialog, popup */
   --color-band: #7a0c14; /* merah tua: pita diagonal di belakang foto */
   --font-display: "Anton", Impact, "Arial Narrow", sans-serif;
+  --font-serif: "Abril Fatface", "Times New Roman", serif;
+  --font-slab: "Alfa Slab One", Rockwell, serif;
+  --font-wide: "Archivo Black", "Arial Black", sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
@@ -241,7 +247,7 @@ button {
   /* titik pusat tempat semua label "mengarah" (% tinggi foto) */
   --cy: 0.14;
   /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
-  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.9vw);
+  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.4vw);
 
   position: relative;
   z-index: 2;
@@ -430,13 +436,14 @@ button {
 
 /* posisi tiap label, versi HP: mengelilingi kepala secara simetris */
 .menu-slot[data-id="education"] {
-  --ix: 0.39;
+  --ix: 0.4;
   --iy: 0.06;
 }
 
 .menu-slot[data-id="photography"] {
   --ix: 0.61;
   --iy: 0.06;
+  --scale: 0.86; /* kata terpanjang; dikecilkan agar tidak terpotong di HP */
 }
 
 .menu-slot[data-id="projects"] {
@@ -453,70 +460,121 @@ button {
   position: relative;
   isolation: isolate;
   display: block;
-  padding: 0.5em 0.9em 0.45em 0.7em;
+  padding: 0.15em 0.2em;
   border: 0;
   background: none;
   color: var(--color-paper);
-  font-family: var(--font-display);
-  font-weight: 400; /* Anton hanya punya satu ketebalan */
   font-size: 1em;
-  letter-spacing: 0.03em;
   line-height: 1;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* pita hitam: sedikit baji, makin tinggi ke arah huruf terakhir */
-.menu-item::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--color-ink);
-  clip-path: polygon(0 16%, 100% 0, 100% 84%, 0 100%);
-  transition: background 0.15s ease;
-}
-
-/* salinan merah bergeser sedikit = efek timbul */
-.menu-item::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: var(--color-accent);
-  clip-path: polygon(0 16%, 100% 0, 100% 84%, 0 100%);
-  transform: translate(0.22em, 0.22em);
-  transition: background 0.15s ease;
-}
-
-.menu-item:hover,
 .menu-item:focus-visible {
   outline: none;
 }
 
-.menu-item:hover::before,
-.menu-item:focus-visible::before {
-  background: var(--color-accent);
-}
-
-.menu-item:hover::after,
-.menu-item:focus-visible::after {
-  background: var(--color-paper);
-}
-
 .menu-label {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
 }
 
-/* --t = 0 (huruf pertama) sampai 1 (huruf terakhir):
-   huruf membesar bertahap dan naik sedikit */
+/* ---------- Gaya huruf "ransom note" ala Persona 5 ----------
+   Variabel per huruf diisi dari ransomLetters.js:
+   --lt   : 0 (huruf pertama) sampai 1 (terakhir), untuk membesar bertahap
+   --lrot : sudut miring (derajat)
+   --ldy  : naik-turun (em)
+   --lk   : variasi ukuran acak
+   ------------------------------------------------------------ */
 .menu-letter {
   display: inline-block;
-  font-size: calc(1em * (0.86 + 0.34 * var(--t)));
-  transform: translateY(calc(var(--t) * -0.05em));
+  margin-inline: -0.05em;
+  font-size: calc(1em * (0.9 + 0.28 * var(--lt)) * var(--lk));
+  transform: translateY(calc(var(--ldy) * 1em)) rotate(calc(var(--lrot) * 1deg));
+  /* bayangan merah di luar bentuk guntingan */
+  filter: drop-shadow(0.06em 0.07em 0 var(--color-accent));
+}
+
+.menu-letter__tile {
+  display: block;
+  padding: 0.07em 0.16em 0.03em;
+  font-weight: 400; /* font-font ini hanya punya satu ketebalan */
+  line-height: 1.05;
+  text-align: center;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+/* huruf kecil dibuat sedikit lebih besar agar seimbang */
+.menu-letter__tile[data-case="lower"] {
+  font-size: 1.2em;
+}
+
+/* warna ubin */
+.menu-letter__tile[data-tone="white"] {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.menu-letter__tile[data-tone="black"] {
+  background: var(--color-ink);
   color: var(--color-paper);
-  text-shadow: 0.05em 0.05em 0 var(--color-ink);
+}
+
+.menu-letter__tile[data-tone="red"] {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* font campuran */
+.menu-letter__tile[data-font="sans"] {
+  font-family: var(--font-display);
+}
+
+.menu-letter__tile[data-font="serif"] {
+  font-family: var(--font-serif);
+}
+
+.menu-letter__tile[data-font="slab"] {
+  font-family: var(--font-slab);
+}
+
+.menu-letter__tile[data-font="wide"] {
+  font-family: var(--font-wide);
+}
+
+/* tepi guntingan tidak rata (empat variasi) */
+.menu-letter__tile[data-clip="0"] {
+  clip-path: polygon(2% 6%, 98% 0, 100% 94%, 0 100%);
+}
+
+.menu-letter__tile[data-clip="1"] {
+  clip-path: polygon(0 0, 100% 5%, 96% 100%, 4% 95%);
+}
+
+.menu-letter__tile[data-clip="2"] {
+  clip-path: polygon(5% 0, 100% 4%, 97% 100%, 0 92%);
+}
+
+.menu-letter__tile[data-clip="3"] {
+  clip-path: polygon(0 8%, 95% 0, 100% 100%, 6% 97%);
+}
+
+/* hover / fokus: warna ubin dibalik */
+.menu-item:hover .menu-letter__tile[data-tone="white"],
+.menu-item:focus-visible .menu-letter__tile[data-tone="white"] {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.menu-item:hover .menu-letter__tile[data-tone="black"],
+.menu-item:focus-visible .menu-letter__tile[data-tone="black"] {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.menu-item:hover .menu-letter__tile[data-tone="red"],
+.menu-item:focus-visible .menu-letter__tile[data-tone="red"] {
+  background: var(--color-paper);
+  color: var(--color-accent);
 }
 
 /* =========================================================
@@ -1012,7 +1070,8 @@ button {
   .stage__figure {
     --figure-h: min(90dvh, 900px);
     --cy: 0.4;
-    --menu-fs: min(clamp(1.1rem, calc(var(--figure-h) * 0.05), 2.8rem), 4vw);
+    /* dibatasi 2.9vw agar huruf tidak terpotong di tablet */
+    --menu-fs: min(clamp(1.2rem, calc(var(--figure-h) * 0.052), 3rem), 2.9vw);
   }
 
   .menu-slot {
@@ -1032,22 +1091,24 @@ button {
 
   /* posisi tiap label, versi tablet & desktop (menyebar dari tengah badan) */
   .menu-slot[data-id="education"] {
-    --ix: 0.23;
+    --ix: 0.17;
     --iy: 0.32;
   }
 
   .menu-slot[data-id="photography"] {
     --ix: 0.79;
-    --iy: 0.34;
+    --iy: 0.31;
+    --aim: 0.55; /* lebih landai agar tidak menabrak dialog */
+    --scale: 1;
   }
 
   .menu-slot[data-id="projects"] {
-    --ix: 0.21;
-    --iy: 0.52;
+    --ix: 0.17;
+    --iy: 0.54;
   }
 
   .menu-slot[data-id="contact"] {
-    --ix: 0.93;
-    --iy: 0.58;
+    --ix: 0.95;
+    --iy: 0.6;
   }
 }

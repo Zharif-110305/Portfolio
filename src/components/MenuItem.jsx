@@ -1,13 +1,14 @@
+import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { buildLetters } from '../lib/ransomLetters'
 
 const LETTER_STAGGER = 0.045 // detik antar huruf
 
-// Posisi, sudut, dan ukuran tiap label diatur di index.css
-// lewat .menu-slot[data-id="..."]. Tiap huruf mendapat --t (0 sampai 1)
-// yang dipakai CSS untuk membesarkan huruf bertahap dari awal ke akhir.
+// Posisi dan sudut tiap label diatur di index.css lewat
+// .menu-slot[data-id="..."]. Gaya tiap huruf (ubin, font, miring) dihasilkan
+// oleh buildLetters() dan dipasang lewat atribut data-* serta variabel CSS.
 export default function MenuItem({ id, label, side, delay = 0, onClick }) {
-  const letters = Array.from(label)
-  const last = Math.max(letters.length - 1, 1)
+  const letters = useMemo(() => buildLetters(label), [label])
 
   return (
     <div className="menu-slot" data-id={id} data-side={side}>
@@ -23,10 +24,19 @@ export default function MenuItem({ id, label, side, delay = 0, onClick }) {
         transition={{ delay, type: 'spring', stiffness: 150, damping: 13 }}
       >
         <span className="menu-label" aria-hidden="true">
-          {letters.map((char, i) => (
-            <span key={i} className="menu-letter" style={{ '--t': i / last }}>
+          {letters.map((letter, i) => (
+            <span
+              key={letter.key}
+              className="menu-letter"
+              style={{
+                '--lt': letter.t,
+                '--lrot': letter.rot,
+                '--ldy': letter.dy,
+                '--lk': letter.k,
+              }}
+            >
               <motion.span
-                style={{ display: 'inline-block' }}
+                style={{ display: 'block' }}
                 initial={{ scale: 0, y: 8 }}
                 animate={{ scale: 1, y: 0 }}
                 transition={{
@@ -36,7 +46,15 @@ export default function MenuItem({ id, label, side, delay = 0, onClick }) {
                   damping: 14,
                 }}
               >
-                {char}
+                <span
+                  className="menu-letter__tile"
+                  data-tone={letter.tone}
+                  data-font={letter.font}
+                  data-clip={letter.clip}
+                  data-case={letter.lower ? 'lower' : 'upper'}
+                >
+                  {letter.char}
+                </span>
               </motion.span>
             </span>
           ))}
