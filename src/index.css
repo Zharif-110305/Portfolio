@@ -247,7 +247,7 @@ button {
   /* titik pusat tempat semua label "mengarah" (% tinggi foto) */
   --cy: 0.14;
   /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
-  --menu-fs: min(calc(var(--figure-h) * 0.06), 4.4vw);
+  --menu-fs: min(calc(var(--figure-h) * 0.066), 4.9vw);
 
   position: relative;
   z-index: 2;
@@ -441,19 +441,21 @@ button {
 }
 
 .menu-slot[data-id="photography"] {
-  --ix: 0.61;
+  --ix: 0.6;
   --iy: 0.06;
   --scale: 0.86; /* kata terpanjang; dikecilkan agar tidak terpotong di HP */
 }
 
 .menu-slot[data-id="projects"] {
-  --ix: 0.33;
+  --ix: 0.36;
   --iy: 0.19;
+  --scale: 0.94;
 }
 
 .menu-slot[data-id="contact"] {
-  --ix: 0.67;
+  --ix: 0.66;
   --iy: 0.19;
+  --scale: 0.97;
 }
 
 .menu-item {
@@ -486,12 +488,15 @@ button {
    --lk   : variasi ukuran acak
    ------------------------------------------------------------ */
 .menu-letter {
+  position: relative;
   display: inline-block;
   margin-inline: -0.05em;
+  cursor: pointer;
   font-size: calc(1em * (0.9 + 0.28 * var(--lt)) * var(--lk));
   transform: translateY(calc(var(--ldy) * 1em)) rotate(calc(var(--lrot) * 1deg));
   /* bayangan merah di luar bentuk guntingan */
   filter: drop-shadow(0.06em 0.07em 0 var(--color-accent));
+  transition: filter 0.15s ease;
 }
 
 .menu-letter__tile {
@@ -500,7 +505,10 @@ button {
   font-weight: 400; /* font-font ini hanya punya satu ketebalan */
   line-height: 1.05;
   text-align: center;
-  transition: background 0.12s ease, color 0.12s ease;
+  transform-origin: 50% 70%;
+  /* easing dengan overshoot = efek memantul saat huruf "melompat" */
+  transition: transform 0.28s cubic-bezier(0.3, 2.1, 0.5, 1),
+    background 0.12s ease, color 0.12s ease, clip-path 0.2s ease;
 }
 
 /* huruf kecil dibuat sedikit lebih besar agar seimbang */
@@ -558,23 +566,104 @@ button {
   clip-path: polygon(0 8%, 95% 0, 100% 100%, 6% 97%);
 }
 
-/* hover / fokus: warna ubin dibalik */
-.menu-item:hover .menu-letter__tile[data-tone="white"],
+/* ---------- Animasi per huruf saat disentuh ----------
+   Huruf yang disentuh: membesar, terangkat, berputar ke arah sebaliknya,
+   warna ubin berbalik, bayangan memanjang. Dua tetangganya ikut terangkat
+   sedikit (efek riak). */
+
+/* kursor (hanya perangkat yang punya mouse / trackpad) */
+@media (hover: hover) {
+  .menu-letter:hover {
+    z-index: 3;
+    filter: drop-shadow(0.14em 0.16em 0 var(--color-accent));
+  }
+
+  .menu-letter:hover .menu-letter__tile {
+    transform: translateY(-0.2em) scale(1.34) rotate(calc(var(--lrot) * -1.5deg));
+    clip-path: polygon(0 14%, 100% 0, 95% 100%, 5% 86%);
+  }
+
+  /* riak: huruf setelah dan sebelum yang disentuh */
+  .menu-letter:hover + .menu-letter .menu-letter__tile {
+    transform: translateY(-0.08em) scale(1.12);
+  }
+
+  .menu-letter:has(+ .menu-letter:hover) .menu-letter__tile {
+    transform: translateY(-0.08em) scale(1.12);
+  }
+
+  .menu-letter:hover .menu-letter__tile[data-tone="white"] {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .menu-letter:hover .menu-letter__tile[data-tone="black"] {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  .menu-letter:hover .menu-letter__tile[data-tone="red"] {
+    background: var(--color-paper);
+    color: var(--color-accent);
+  }
+}
+
+/* layar sentuh: huruf yang ditekan jari */
+.menu-letter:active {
+  z-index: 3;
+  filter: drop-shadow(0.14em 0.16em 0 var(--color-accent));
+}
+
+.menu-letter:active .menu-letter__tile {
+  transform: translateY(-0.2em) scale(1.34) rotate(calc(var(--lrot) * -1.5deg));
+  clip-path: polygon(0 14%, 100% 0, 95% 100%, 5% 86%);
+}
+
+.menu-letter:active .menu-letter__tile[data-tone="white"] {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.menu-letter:active .menu-letter__tile[data-tone="black"] {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.menu-letter:active .menu-letter__tile[data-tone="red"] {
+  background: var(--color-paper);
+  color: var(--color-accent);
+}
+
+/* keyboard (Tab): seluruh kata menyala */
+.menu-item:focus-visible .menu-letter__tile {
+  transform: translateY(-0.1em) scale(1.12);
+}
+
 .menu-item:focus-visible .menu-letter__tile[data-tone="white"] {
   background: var(--color-accent);
   color: var(--color-paper);
 }
 
-.menu-item:hover .menu-letter__tile[data-tone="black"],
 .menu-item:focus-visible .menu-letter__tile[data-tone="black"] {
   background: var(--color-paper);
   color: var(--color-ink);
 }
 
-.menu-item:hover .menu-letter__tile[data-tone="red"],
 .menu-item:focus-visible .menu-letter__tile[data-tone="red"] {
   background: var(--color-paper);
   color: var(--color-accent);
+}
+
+/* pengguna "kurangi gerakan": hanya warna yang berubah, tanpa loncatan */
+@media (prefers-reduced-motion: reduce) {
+  .menu-letter__tile,
+  .menu-letter:hover .menu-letter__tile,
+  .menu-letter:active .menu-letter__tile,
+  .menu-letter:hover + .menu-letter .menu-letter__tile,
+  .menu-letter:has(+ .menu-letter:hover) .menu-letter__tile,
+  .menu-item:focus-visible .menu-letter__tile {
+    transform: none;
+  }
 }
 
 /* =========================================================
@@ -1105,10 +1194,12 @@ button {
   .menu-slot[data-id="projects"] {
     --ix: 0.17;
     --iy: 0.54;
+    --scale: 1;
   }
 
   .menu-slot[data-id="contact"] {
     --ix: 0.95;
     --iy: 0.6;
+    --scale: 1;
   }
 }
