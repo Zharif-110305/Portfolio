@@ -1,30 +1,32 @@
-import { TECH_ICONS } from '../data/techIcons'
+import { memo } from 'react'
+import techStrip from '../assets/tech-strip.webp'
 
-const ROW_COUNT = 7 // jumlah baris; arah selang-seling diatur di CSS
-const ROW_SHIFT = 5 // tiap baris mulai dari logo yang berbeda
+const ROW_COUNT = 7
 
-function rotate(list, n) {
-  return [...list.slice(n), ...list.slice(0, n)]
-}
+// Latar logo bahasa pemrograman: satu gambar yang sudah di-blur dan
+// ditransparankan sebelumnya (lihat scripts/build-tech-strip.mjs)
+// ditampilkan berulang dan digeser lewat CSS (.tech-track, transform saja).
+// Tidak ada ikon React atau filter blur yang dihitung ulang saat animasi
+// berjalan — itu penyebab utama latar terasa patah-patah di HP kelas
+// menengah ke bawah.
+const rows = Array.from({ length: ROW_COUNT }, (_, i) => (
+  <div className="tech-row" key={i}>
+    <div
+      className="tech-track"
+      style={{ backgroundImage: `url(${techStrip})` }}
+    />
+  </div>
+))
 
-export default function TechBackground() {
+function TechBackground() {
   return (
     <div className="tech-bg" aria-hidden="true">
-      {Array.from({ length: ROW_COUNT }, (_, row) => {
-        const set = rotate(TECH_ICONS, (row * ROW_SHIFT) % TECH_ICONS.length)
-        // dua salinan agar putarannya mulus tanpa jeda
-        const items = [...set, ...set]
-
-        return (
-          <div className="tech-row" key={row}>
-            <div className="tech-track">
-              {items.map(({ name, Icon }, i) => (
-                <Icon key={`${i}-${name}`} className="tech-logo" />
-              ))}
-            </div>
-          </div>
-        )
-      })}
+      {rows}
     </div>
   )
 }
+
+// Tidak punya props yang berubah, jadi cukup dirender sekali dan tidak
+// perlu ikut render ulang setiap kali state lain (mis. efek tembakan) di
+// atasnya berubah.
+export default memo(TechBackground)

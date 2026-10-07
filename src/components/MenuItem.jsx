@@ -1,27 +1,27 @@
 import { useMemo } from 'react'
-import { motion } from 'motion/react'
 import { buildLetters } from '../lib/ransomLetters'
-
-const LETTER_STAGGER = 0.045 // detik antar huruf
+import { pointFromEvent } from '../lib/pointerPosition'
 
 // Posisi dan sudut tiap label diatur di index.css lewat
 // .menu-slot[data-id="..."]. Gaya tiap huruf (ubin, font, miring) dihasilkan
 // oleh buildLetters() dan dipasang lewat atribut data-* serta variabel CSS.
-export default function MenuItem({ id, label, side, delay = 0, onClick }) {
+//
+// Animasi munculnya (kata meluncur masuk, lalu huruf "melompat" satu per
+// satu) dilakukan lewat CSS @keyframes di index.css, bukan lewat JavaScript
+// (dulu Framer Motion). Untuk ~30 huruf yang muncul sekaligus, versi CSS
+// jauh lebih ringan di HP karena browser bisa menjalankannya di luar thread
+// utama, alih-alih menjalankan puluhan simulasi pegas dengan JavaScript.
+function MenuItem({ id, label, side, delay = 0, onSelect }) {
   const letters = useMemo(() => buildLetters(label), [label])
 
   return (
     <div className="menu-slot" data-id={id} data-side={side}>
-      <motion.button
+      <button
         type="button"
         className="menu-item"
         aria-label={label}
-        onClick={onClick}
-        style={{ originX: side === 'left' ? 1 : 0 }} // melebar dari sisi badan
-        initial={{ x: side === 'left' ? '60%' : '-60%', scaleX: 0.2, opacity: 0 }}
-        animate={{ x: 0, scaleX: 1, opacity: 1 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ delay, type: 'spring', stiffness: 150, damping: 13 }}
+        onClick={(e) => onSelect(id, pointFromEvent(e))}
+        style={{ '--menu-delay': `${delay}s` }}
       >
         <span className="menu-label" aria-hidden="true">
           {letters.map((letter, i) => (
@@ -33,33 +33,24 @@ export default function MenuItem({ id, label, side, delay = 0, onClick }) {
                 '--lrot': letter.rot,
                 '--ldy': letter.dy,
                 '--lk': letter.k,
+                '--i': i,
               }}
             >
-              <motion.span
-                style={{ display: 'block' }}
-                initial={{ scale: 0, y: 8 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{
-                  delay: delay + 0.2 + i * LETTER_STAGGER,
-                  type: 'spring',
-                  stiffness: 320,
-                  damping: 14,
-                }}
+              <span
+                className="menu-letter__tile"
+                data-tone={letter.tone}
+                data-font={letter.font}
+                data-clip={letter.clip}
+                data-case={letter.lower ? 'lower' : 'upper'}
               >
-                <span
-                  className="menu-letter__tile"
-                  data-tone={letter.tone}
-                  data-font={letter.font}
-                  data-clip={letter.clip}
-                  data-case={letter.lower ? 'lower' : 'upper'}
-                >
-                  {letter.char}
-                </span>
-              </motion.span>
+                {letter.char}
+              </span>
             </span>
           ))}
         </span>
-      </motion.button>
+      </button>
     </div>
   )
 }
+
+export default MenuItem

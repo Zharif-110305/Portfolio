@@ -3,6 +3,8 @@
 export const GUNSHOT_SOUND = true
 
 let audioContext = null
+let noiseBuffer = null // dibuat sekali lalu dipakai ulang di setiap tembakan,
+// supaya klik menu tidak perlu mengisi ribuan sampel noise saat itu juga
 
 function getAudioContext() {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext
@@ -12,6 +14,31 @@ function getAudioContext() {
   return audioContext
 }
 
+function getNoiseBuffer(audio) {
+  if (noiseBuffer) return noiseBuffer
+  const length = 0.35
+  const buffer = audio.createBuffer(
+    1,
+    Math.floor(audio.sampleRate * length),
+    audio.sampleRate,
+  )
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    const decay = Math.pow(1 - i / data.length, 2)
+    data[i] = (Math.random() * 2 - 1) * decay
+  }
+  noiseBuffer = buffer
+  return buffer
+}
+
+// Panggil sekali dari gestur pengguna pertama (lihat lib/prewarm.js) supaya
+// AudioContext sudah menyala dan buffer noise sudah siap sebelum menu
+// pertama kali diklik.
+export function prewarmAudio() {
+  const audio = getAudioContext()
+  if (audio) getNoiseBuffer(audio)
+}
+
 // volume: 0 sampai 1
 export function playGunshot(volume = 0.3) {
   try {
@@ -19,21 +46,9 @@ export function playGunshot(volume = 0.3) {
     if (!audio) return
     const now = audio.currentTime
 
-    // 1) Letusan: noise yang meredup cepat, disaring low-pass yang menutup
-    const length = 0.35
-    const buffer = audio.createBuffer(
-      1,
-      Math.floor(audio.sampleRate * length),
-      audio.sampleRate,
-    )
-    const data = buffer.getChannelData(0)
-    for (let i = 0; i < data.length; i++) {
-      const decay = Math.pow(1 - i / data.length, 2)
-      data[i] = (Math.random() * 2 - 1) * decay
-    }
-
+    // 1) Letusan: noise (buffer yang sudah disiapkan) disaring low-pass yang menutup
     const noise = audio.createBufferSource()
-    noise.buffer = buffer
+    noise.buffer = getNoiseBuffer(audio)
 
     const filter = audio.createBiquadFilter()
     filter.type = 'lowpass'
@@ -42,7 +57,7 @@ export function playGunshot(volume = 0.3) {
 
     const noiseGain = audio.createGain()
     noiseGain.gain.setValueAtTime(volume, now)
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + length)
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35)
 
     noise.connect(filter)
     filter.connect(noiseGain)

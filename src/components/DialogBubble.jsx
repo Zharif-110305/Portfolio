@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
 const TYPE_SPEED = 38 // ms per huruf
@@ -30,7 +30,7 @@ function TypedText({ text, onDone }) {
   )
 }
 
-export default function DialogBubble({ speaker, lines }) {
+function DialogBubble({ speaker, lines }) {
   const [index, setIndex] = useState(0)
   const next = useCallback(
     () => setIndex((i) => (i + 1) % lines.length),
@@ -53,3 +53,8 @@ export default function DialogBubble({ speaker, lines }) {
     </motion.div>
   )
 }
+
+// speaker & lines datang dari data/profile.js (objek modul, referensinya
+// stabil), jadi memo di sini efektif mencegah render ulang yang tidak perlu
+// saat komponen di atasnya (Stage) render ulang karena state lain.
+export default memo(DialogBubble)

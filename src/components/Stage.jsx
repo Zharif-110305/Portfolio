@@ -1,8 +1,10 @@
+import { memo } from 'react'
 import { motion } from 'motion/react'
 import DialogBubble from './DialogBubble'
 import MenuItem from './MenuItem'
 import TechBackground from './TechBackground'
 import { profile } from '../data/profile'
+import { pointFromEvent } from '../lib/pointerPosition'
 
 // Mengambil src/assets/images/profile.* (png/webp/jpg).
 // Kalau filenya belum ada, hasilnya kosong dan placeholder yang tampil.
@@ -22,16 +24,7 @@ const MENU = [
 const MENU_START_DELAY = 0.9 // detik, menunggu foto & dialog muncul
 const MENU_STAGGER = 0.14
 
-// Titik efek tembakan: posisi klik; kalau lewat keyboard, tengah elemen.
-function pointFromEvent(event) {
-  if (event.clientX || event.clientY) {
-    return { x: event.clientX, y: event.clientY }
-  }
-  const rect = event.currentTarget.getBoundingClientRect()
-  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-}
-
-export default function Stage({ onSelect = () => {} }) {
+function Stage({ onSelect }) {
   return (
     <motion.main
       className="stage"
@@ -64,7 +57,7 @@ export default function Stage({ onSelect = () => {} }) {
               label={item.label}
               side={item.side}
               delay={MENU_START_DELAY + i * MENU_STAGGER}
-              onClick={(e) => onSelect(item.id, pointFromEvent(e))}
+              onSelect={onSelect}
             />
           ))}
         </nav>
@@ -81,6 +74,10 @@ export default function Stage({ onSelect = () => {} }) {
               src={profilePhoto}
               alt="Foto profil"
               draggable="false"
+              width="749"
+              height="1358"
+              fetchPriority="high"
+              decoding="async"
             />
           ) : (
             <div className="stage__photo-placeholder">PHOTO</div>
@@ -90,3 +87,9 @@ export default function Stage({ onSelect = () => {} }) {
     </motion.main>
   )
 }
+
+// onSelect (dari App.jsx) referensinya stabil (useCallback), jadi memo di
+// sini membuat seluruh panggung — dialog, foto, dan ~30 huruf menu — TIDAK
+// ikut render ulang saat App hanya memperbarui state efek tembakan atau
+// popup. Ini perubahan performa yang paling besar pengaruhnya.
+export default memo(Stage)
