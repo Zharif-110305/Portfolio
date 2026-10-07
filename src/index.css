@@ -94,7 +94,7 @@ button {
   background-repeat: repeat-x;
   background-position: 0 50%;
   background-size: auto 100%;
-  animation: tech-left var(--dur, 80s) linear infinite;
+  animation: tech-left var(--dur, 34s) linear infinite;
   will-change: transform; /* animasi permanen selama sesi; layer GPU memang dibutuhkan */
 }
 
@@ -104,15 +104,15 @@ button {
 
 /* kecepatan tiap baris dibuat berbeda */
 .tech-row:nth-child(3n + 1) {
-  --dur: 90s;
+  --dur: 34s;
 }
 
 .tech-row:nth-child(3n + 2) {
-  --dur: 70s;
+  --dur: 26s;
 }
 
 .tech-row:nth-child(3n) {
-  --dur: 110s;
+  --dur: 44s;
 }
 
 @keyframes tech-left {
