@@ -21,8 +21,8 @@ const MENU = [
   { id: 'contact', label: 'Contact', side: 'right' },
 ]
 
-const MENU_START_DELAY = 0.9 // detik, menunggu foto & dialog muncul
-const MENU_STAGGER = 0.14
+const MENU_START_DELAY = 0.75 // detik, menunggu foto & dialog muncul
+const MENU_STAGGER = 0.1
 
 function Stage({ onSelect }) {
   return (
@@ -88,8 +88,4 @@ function Stage({ onSelect }) {
   )
 }
 
-// onSelect (dari App.jsx) referensinya stabil (useCallback), jadi memo di
-// sini membuat seluruh panggung — dialog, foto, dan ~30 huruf menu — TIDAK
-// ikut render ulang saat App hanya memperbarui state efek tembakan atau
-// popup. Ini perubahan performa yang paling besar pengaruhnya.
 export default memo(Stage)

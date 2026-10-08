@@ -58,8 +58,7 @@ button {
    Satu gambar statis yang SUDAH di-blur dan ditransparankan sebelumnya
    (src/assets/tech-strip.webp, dibuat oleh scripts/build-tech-strip.mjs)
    ditampilkan berulang dan digeser lewat transform. Tidak ada filter CSS
-   atau ikon React yang diproses saat animasi berjalan — itu sebabnya versi
-   ini jauh lebih ringan di HP daripada merender ikon + filter: blur() hidup.
+   atau ikon React yang diproses saat animasi berjalan.
    ========================================================= */
 .tech-bg {
   --logo-size: clamp(2rem, 6.5dvh, 4rem);
@@ -72,7 +71,7 @@ button {
   justify-content: space-evenly;
   overflow: hidden;
   pointer-events: none;
-  contain: layout style paint; /* isolasi: perubahan di sini tak memicu reflow di luar */
+  contain: layout style paint;
 }
 
 .tech-row {
@@ -83,26 +82,23 @@ button {
 }
 
 .tech-track {
-  /* rasio lebar:tinggi satu "tile" tech-strip.webp (slot 148px / tinggi 80px
-     dari build-tech-strip.mjs). Sesuaikan kalau GAP/ICON di script diubah. */
   --tile-ratio: 1.85;
   --tile-w: calc(var(--logo-size) * var(--tile-ratio));
 
   position: absolute;
   inset: 0 auto 0 0;
-  width: calc(200vw + var(--tile-w)); /* selalu menutupi layar + 1 tile ekstra */
+  width: calc(200vw + var(--tile-w));
   background-repeat: repeat-x;
   background-position: 0 50%;
   background-size: auto 100%;
   animation: tech-left var(--dur, 34s) linear infinite;
-  will-change: transform; /* animasi permanen selama sesi; layer GPU memang dibutuhkan */
+  will-change: transform;
 }
 
 .tech-row:nth-child(even) .tech-track {
   animation-name: tech-right;
 }
 
-/* kecepatan tiap baris dibuat berbeda */
 .tech-row:nth-child(3n + 1) {
   --dur: 34s;
 }
@@ -217,7 +213,6 @@ button {
   background: var(--color-ink);
 }
 
-/* pita diagonal ala Persona (merah tua agar tidak menyatu dengan label) */
 .stage__backdrop::before {
   content: "";
   position: absolute;
@@ -226,7 +221,6 @@ button {
   clip-path: polygon(0 62%, 100% 36%, 100% 58%, 0 84%);
 }
 
-/* garis putih tipis di atas pita */
 .stage__backdrop::after {
   content: "";
   position: absolute;
@@ -237,18 +231,12 @@ button {
 
 /* =========================================================
    FIGURE (foto + label menu satu kelompok)
-   Urutan lapisan di dalamnya:
-   hotspot (0) < label menu (1) < foto (2)
-   Label menu berada DI BELAKANG foto.
    ========================================================= */
 .stage__figure {
-  /* lebar : tinggi foto (profile.webp = 749 / 1358). Ubah kalau foto diganti. */
   --photo-aspect: 0.5516;
   --figure-h: min(66dvh, 720px);
   --figure-w: calc(var(--figure-h) * var(--photo-aspect));
-  /* titik pusat tempat semua label "mengarah" (% tinggi foto) */
   --cy: 0.14;
-  /* ukuran dasar huruf label; dibatasi lebar layar agar tidak terpotong */
   --menu-fs: min(calc(var(--figure-h) * 0.066), 4.9vw);
 
   position: relative;
@@ -262,7 +250,7 @@ button {
   position: absolute;
   inset: 0;
   z-index: 2;
-  pointer-events: none; /* klik diteruskan ke label / hotspot di bawahnya */
+  pointer-events: none;
 }
 
 .stage__photo {
@@ -286,7 +274,6 @@ button {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* area klik easter egg (profil), hanya bagian tengah foto */
 .stage__hotspot {
   position: absolute;
   z-index: 0;
@@ -354,7 +341,6 @@ button {
   clip-path: polygon(0 6%, 100% 0, 98% 100%, 2% 94%);
 }
 
-/* teks tak terlihat untuk menjaga tinggi bubble stabil saat mengetik */
 .dialog__typed {
   position: relative;
   display: block;
@@ -388,15 +374,6 @@ button {
 
 /* =========================================================
    MENU (label di belakang foto, semuanya mengarah ke tengah)
-
-   Per label (lihat .menu-slot[data-id] di bawah):
-   --ix, --iy : titik ujung label yang menyentuh badan, sebagai
-                pecahan lebar (--ix) dan tinggi (--iy) foto.
-                Sudut miring dihitung otomatis supaya label
-                mengarah ke pusat foto.
-   --aim      : seberapa penuh label menghadap pusat (1 = tepat,
-                lebih kecil = lebih landai)
-   --scale    : ukuran relatif
    ========================================================= */
 .stage__menu {
   display: contents;
@@ -416,7 +393,6 @@ button {
   font-size: var(--menu-fs);
 }
 
-/* label kiri: ujung KANAN di badan, dibaca menuju pusat */
 .menu-slot[data-side="left"] {
   --rot: calc(
     var(--aim) * atan2(calc(var(--cyp) - var(--py)), calc(var(--cxp) - var(--px)))
@@ -426,7 +402,6 @@ button {
   transform: translateY(-50%) rotate(var(--rot)) scale(var(--scale));
 }
 
-/* label kanan: ujung KIRI di badan, dibaca menjauh dari pusat */
 .menu-slot[data-side="right"] {
   --rot: calc(
     var(--aim) * atan2(calc(var(--py) - var(--cyp)), calc(var(--px) - var(--cxp)))
@@ -436,7 +411,6 @@ button {
   transform: translateY(-50%) rotate(var(--rot)) scale(var(--scale));
 }
 
-/* posisi tiap label, versi HP: mengelilingi kepala secara simetris */
 .menu-slot[data-id="education"] {
   --ix: 0.4;
   --iy: 0.06;
@@ -445,7 +419,7 @@ button {
 .menu-slot[data-id="photography"] {
   --ix: 0.6;
   --iy: 0.06;
-  --scale: 0.86; /* kata terpanjang; dikecilkan agar tidak terpotong di HP */
+  --scale: 0.86;
 }
 
 .menu-slot[data-id="projects"] {
@@ -482,13 +456,7 @@ button {
   align-items: center;
 }
 
-/* ---------- Munculnya label: kata meluncur dari sisi badan ----------
-   --menu-delay diisi dari MenuItem.jsx (JSX inline style). Pakai CSS
-   animation (bukan JS) supaya browser bisa menjalankannya di luar thread
-   utama — jauh lebih ringan saat ~30 huruf dari 4 kata muncul sekaligus.
-   "backwards" (bukan "forwards") dipakai supaya begitu animasi selesai,
-   kontrol kembali ke CSS biasa dan :hover/:active/:focus tetap berfungsi
-   normal sesudahnya. ------------------------------------------------- */
+/* ---------- Munculnya label: kata meluncur dari sisi badan ---------- */
 @keyframes menu-slide-left {
   from {
     transform: translateX(60%) scaleX(0.2);
@@ -513,13 +481,13 @@ button {
 
 .menu-slot[data-side="left"] .menu-item {
   transform-origin: 100% 50%;
-  animation: menu-slide-left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation: menu-slide-left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   animation-delay: var(--menu-delay);
 }
 
 .menu-slot[data-side="right"] .menu-item {
   transform-origin: 0 50%;
-  animation: menu-slide-right 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation: menu-slide-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   animation-delay: var(--menu-delay);
 }
 
@@ -528,54 +496,35 @@ button {
 }
 
 /* ---------- Gaya huruf "ransom note" ala Persona 5 ----------
-   Variabel per huruf diisi dari ransomLetters.js:
-   --lt   : 0 (huruf pertama) sampai 1 (terakhir), untuk membesar bertahap
-   --lrot : sudut miring (derajat)
-   --ldy  : naik-turun (em)
-   --lk   : variasi ukuran acak
-   --i    : urutan huruf, dipakai untuk jeda animasi munculnya
-   ------------------------------------------------------------ */
+   --lt/--lrot/--ldy/--lk dari ransomLetters.js, --i urutan huruf (untuk
+   jeda animasi munculnya). Bayangan merah dibuat lewat filter: drop-shadow
+   (cara yang terbukti benar — jangan diganti ke teknik lain tanpa diuji). */
 .menu-letter {
   position: relative;
-  isolation: isolate;
   display: inline-block;
   margin-inline: -0.05em;
   cursor: pointer;
   font-size: calc(1em * (0.9 + 0.28 * var(--lt)) * var(--lk));
   transform: translateY(calc(var(--ldy) * 1em)) rotate(calc(var(--lrot) * 1deg));
+  filter: drop-shadow(0.06em 0.07em 0 var(--color-accent));
+  transition: filter 0.15s ease;
 }
 
 .menu-letter__tile {
-  position: relative;
   display: block;
   padding: 0.07em 0.16em 0.03em;
-  font-weight: 400; /* font-font ini hanya punya satu ketebalan */
+  font-weight: 400;
   line-height: 1.05;
   text-align: center;
   transform-origin: 50% 70%;
-  /* easing dengan overshoot = efek memantul saat huruf "melompat" masuk
-     atau disentuh; dipakai juga oleh animasi munculnya huruf di bawah */
   transition: transform 0.28s cubic-bezier(0.3, 2.1, 0.5, 1),
     background 0.12s ease, color 0.12s ease, clip-path 0.2s ease;
 }
 
-/* bayangan merah di belakang tiap huruf: bentuk padat dengan guntingan yang
-   SAMA PERSIS seperti tile-nya, digeser sedikit. Dulu dibuat lewat
-   `filter: drop-shadow()`, tapi filter pada puluhan huruf sekaligus berat
-   dihitung browser — terutama saat semuanya animasi masuk bersamaan,
-   itulah penyebab patah-patahnya. Cara ini terlihat sama (bahkan lebih
-   presisi) tanpa filter sama sekali, jadi jauh lebih ringan. */
-.menu-letter__tile::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--color-accent);
-  transform: translate(0.06em, 0.07em);
-  transition: transform 0.15s ease;
-}
-
-/* huruf "melompat" masuk satu per satu, sesaat setelah kata-nya meluncur */
+/* huruf "melompat" masuk satu per satu, sesaat setelah kata-nya meluncur.
+   Jeda antar huruf dipersingkat (0.025s, dari 0.045s) dan pantulannya
+   dibuat senada dengan geseran kata, supaya seluruh menu selesai muncul
+   jauh lebih cepat dan terasa lebih rapi — bukan sekadar lebih ringan. */
 @keyframes letter-pop {
   from {
     transform: scale(0) translateY(0.4em);
@@ -588,16 +537,14 @@ button {
 }
 
 .menu-letter__tile {
-  animation: letter-pop 0.4s cubic-bezier(0.3, 2.1, 0.5, 1) backwards;
-  animation-delay: calc(var(--menu-delay) + 0.2s + var(--i) * 0.045s);
+  animation: letter-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--menu-delay) + 0.15s + var(--i) * 0.025s);
 }
 
-/* huruf kecil dibuat sedikit lebih besar agar seimbang */
 .menu-letter__tile[data-case="lower"] {
   font-size: 1.2em;
 }
 
-/* warna ubin */
 .menu-letter__tile[data-tone="white"] {
   background: var(--color-paper);
   color: var(--color-ink);
@@ -613,7 +560,6 @@ button {
   color: var(--color-paper);
 }
 
-/* font campuran */
 .menu-letter__tile[data-font="sans"] {
   font-family: var(--font-display);
 }
@@ -630,37 +576,27 @@ button {
   font-family: var(--font-wide);
 }
 
-/* tepi guntingan tidak rata (empat variasi); dipakai juga oleh bayangan
-   merah di atas (::before) supaya bentuknya sama persis */
-.menu-letter__tile[data-clip="0"],
-.menu-letter__tile[data-clip="0"]::before {
+.menu-letter__tile[data-clip="0"] {
   clip-path: polygon(2% 6%, 98% 0, 100% 94%, 0 100%);
 }
 
-.menu-letter__tile[data-clip="1"],
-.menu-letter__tile[data-clip="1"]::before {
+.menu-letter__tile[data-clip="1"] {
   clip-path: polygon(0 0, 100% 5%, 96% 100%, 4% 95%);
 }
 
-.menu-letter__tile[data-clip="2"],
-.menu-letter__tile[data-clip="2"]::before {
+.menu-letter__tile[data-clip="2"] {
   clip-path: polygon(5% 0, 100% 4%, 97% 100%, 0 92%);
 }
 
-.menu-letter__tile[data-clip="3"],
-.menu-letter__tile[data-clip="3"]::before {
+.menu-letter__tile[data-clip="3"] {
   clip-path: polygon(0 8%, 95% 0, 100% 100%, 6% 97%);
 }
 
-/* ---------- Animasi per huruf saat disentuh ----------
-   Huruf yang disentuh: membesar, terangkat, berputar ke arah sebaliknya,
-   warna ubin berbalik, bayangan merahnya bergeser lebih jauh. Dua
-   tetangganya ikut terangkat sedikit (efek riak). will-change hanya
-   dipasang saat disentuh (bukan permanen) supaya puluhan huruf tidak
-   menahan layer GPU sepanjang waktu. */
+/* ---------- Animasi per huruf saat disentuh ---------- */
 @media (hover: hover) {
   .menu-letter:hover {
     z-index: 3;
+    filter: drop-shadow(0.14em 0.16em 0 var(--color-accent));
   }
 
   .menu-letter:hover .menu-letter__tile {
@@ -669,11 +605,6 @@ button {
     will-change: transform;
   }
 
-  .menu-letter:hover .menu-letter__tile::before {
-    transform: translate(0.14em, 0.16em);
-  }
-
-  /* riak: huruf setelah dan sebelum yang disentuh */
   .menu-letter:hover + .menu-letter .menu-letter__tile {
     transform: translateY(-0.08em) scale(1.12);
   }
@@ -698,18 +629,14 @@ button {
   }
 }
 
-/* layar sentuh: huruf yang ditekan jari */
 .menu-letter:active {
   z-index: 3;
+  filter: drop-shadow(0.14em 0.16em 0 var(--color-accent));
 }
 
 .menu-letter:active .menu-letter__tile {
   transform: translateY(-0.2em) scale(1.34) rotate(calc(var(--lrot) * -1.5deg));
   clip-path: polygon(0 14%, 100% 0, 95% 100%, 5% 86%);
-}
-
-.menu-letter:active .menu-letter__tile::before {
-  transform: translate(0.14em, 0.16em);
 }
 
 .menu-letter:active .menu-letter__tile[data-tone="white"] {
@@ -727,7 +654,6 @@ button {
   color: var(--color-accent);
 }
 
-/* keyboard (Tab): seluruh kata menyala */
 .menu-item:focus-visible .menu-letter__tile {
   transform: translateY(-0.1em) scale(1.12);
 }
@@ -747,7 +673,6 @@ button {
   color: var(--color-accent);
 }
 
-/* pengguna "kurangi gerakan": label langsung utuh, tanpa animasi loncat */
 @media (prefers-reduced-motion: reduce) {
   .menu-item,
   .menu-letter__tile {
@@ -766,19 +691,10 @@ button {
 
 /* =========================================================
    SHOT EFFECT (efek tembakan saat menu diklik)
-
-   --x, --y : titik klik (diisi dari ShotEffect.jsx)
-   Durasi total diatur di App.jsx (SHOT_DURATION).
-
-   Hanya DUA elemen: kilatan putih polos (murah, satu warna solid) dan satu
-   gambar sprite yang sudah berisi cahaya + sinar + cincin (dibuat sekali
-   lewat scripts/build-shot-sprite.mjs). Sebelumnya efek ini dibangun dari
-   beberapa radial-gradient dan conic-gradient + mask hidup yang dihitung
-   ulang oleh HP tiap klik — itulah penyebab utama delay saat menu diklik.
    ========================================================= */
 .app--shake {
   animation: shot-shake 0.24s linear;
-  will-change: transform; /* dilepas otomatis saat class ini dicopot React */
+  will-change: transform;
 }
 
 @keyframes shot-shake {
@@ -814,7 +730,6 @@ button {
   contain: layout style paint;
 }
 
-/* kilatan putih layar penuh, sangat singkat — satu warna solid, murah */
 .shot__flash {
   position: absolute;
   inset: 0;
@@ -838,8 +753,6 @@ button {
   }
 }
 
-/* satu gambar (cahaya + sinar + cincin sudah jadi satu), hanya transform +
-   opacity yang dianimasikan — tidak ada gradient/mask dihitung saat berjalan */
 .shot__sprite {
   position: absolute;
   left: var(--x);
@@ -1173,7 +1086,6 @@ button {
   .stage__figure {
     --figure-h: min(90dvh, 900px);
     --cy: 0.4;
-    /* dibatasi 2.9vw agar huruf tidak terpotong di tablet */
     --menu-fs: min(clamp(1.2rem, calc(var(--figure-h) * 0.052), 3rem), 2.9vw);
   }
 
@@ -1181,7 +1093,6 @@ button {
     --aim: 0.85;
   }
 
-  /* dialog bergeser ke kanan kepala; lebarnya dibatasi agar tidak terpotong */
   .dialog {
     width: min(26rem, calc(50vw - clamp(2rem, 9vw, 9rem) - 1rem));
   }
@@ -1192,7 +1103,6 @@ button {
     right: auto;
   }
 
-  /* posisi tiap label, versi tablet & desktop (menyebar dari tengah badan) */
   .menu-slot[data-id="education"] {
     --ix: 0.17;
     --iy: 0.32;
@@ -1201,7 +1111,7 @@ button {
   .menu-slot[data-id="photography"] {
     --ix: 0.79;
     --iy: 0.31;
-    --aim: 0.55; /* lebih landai agar tidak menabrak dialog */
+    --aim: 0.55;
     --scale: 1;
   }
 
