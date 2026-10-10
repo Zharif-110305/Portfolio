@@ -1,17 +1,19 @@
-// Membuat src/assets/tech-strip.webp: satu pita logo bahasa pemrograman yang
-// SUDAH transparan dan blur di dalam gambarnya (bukan lewat CSS filter saat
-// berjalan). Dipakai sebagai latar bergerak (lihat .tech-track di index.css).
-// Karena blurnya sudah "dipanggang" ke piksel, HP tinggal menggeser gambar
-// (murah) alih-alih menghitung ulang blur tiap frame (mahal, penyebab umum
-// animasi patah-patah di perangkat kelas menengah ke bawah).
+// Membuat src/assets/tech-strip.webp DAN tech-strip.avif: satu pita logo
+// bahasa pemrograman yang SUDAH transparan dan blur di dalam gambarnya
+// (bukan lewat CSS filter saat berjalan). Dipakai sebagai latar bergerak
+// (lihat .tech-track di index.css, dipasang lewat image-set() di
+// TechBackground.jsx — browser otomatis memilih AVIF kalau didukung, atau
+// WebP kalau tidak). Karena blurnya sudah "dipanggang" ke piksel, HP
+// tinggal menggeser gambar (murah) alih-alih menghitung ulang blur tiap
+// frame (mahal, penyebab umum animasi patah-patah di perangkat kelas
+// menengah ke bawah).
 //
 // Jalankan ulang setelah mengubah daftar ICONS atau pengaturan di bawah:
 //   node scripts/build-tech-strip.mjs
-import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import sharp from '/home/claude/.npm-global/lib/node_modules/sharp/lib/index.js'
+import sharp from 'sharp' // perlu: npm install -D sharp
 import {
   SiReact, SiJavascript, SiTypescript, SiPython, SiHtml5, SiNodedotjs,
   SiPhp, SiCplusplus, SiGo, SiRust, SiKotlin, SiDart, SiFlutter,
@@ -52,10 +54,13 @@ const svg =
   `<feGaussianBlur stdDeviation="${BLUR}"/></filter></defs>` +
   `<g fill="#fff" opacity="${OPACITY}" filter="url(#b)">${parts.join('')}</g></svg>`
 
-const outPath = fileURLToPath(new URL('../src/assets/tech-strip.webp', import.meta.url))
-await sharp(Buffer.from(svg), { density: 96 * SCALE })
-  .resize(width * SCALE, height * SCALE)
-  .webp({ quality: 90, alphaQuality: 90 })
-  .toFile(outPath)
+const svgBuffer = Buffer.from(svg)
+const base = sharp(svgBuffer, { density: 96 * SCALE }).resize(width * SCALE, height * SCALE)
 
-console.log(`tech-strip.webp: ${width * SCALE}x${height * SCALE} (satu tile = ${slot}px lebar pada skala dasar)`)
+const webpPath = fileURLToPath(new URL('../src/assets/tech-strip.webp', import.meta.url))
+const avifPath = fileURLToPath(new URL('../src/assets/tech-strip.avif', import.meta.url))
+
+await base.clone().webp({ quality: 90, alphaQuality: 90 }).toFile(webpPath)
+await base.clone().avif({ quality: 45, effort: 6 }).toFile(avifPath)
+
+console.log(`tech-strip.webp & tech-strip.avif: ${width * SCALE}x${height * SCALE} (satu tile = ${slot}px lebar pada skala dasar)`)

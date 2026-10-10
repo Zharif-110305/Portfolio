@@ -6,13 +6,20 @@ import TechBackground from './TechBackground'
 import { profile } from '../data/profile'
 import { pointFromEvent } from '../lib/pointerPosition'
 
-// Mengambil src/assets/images/profile.* (png/webp/jpg).
-// Kalau filenya belum ada, hasilnya kosong dan placeholder yang tampil.
-const photoModules = import.meta.glob('../assets/images/profile.*', {
+// Mengambil src/assets/images/profile.webp (wajib) dan profile.avif
+// (opsional — kalau ada, dipakai lebih dulu karena jauh lebih kecil; kalau
+// belum dibuat, foto tetap tampil normal lewat WebP saja). Lihat
+// scripts/optimize-photo.mjs untuk membuat keduanya dari satu foto sumber.
+const avifModules = import.meta.glob('../assets/images/profile.avif', {
   eager: true,
   import: 'default',
 })
-const profilePhoto = Object.values(photoModules)[0] ?? null
+const webpModules = import.meta.glob('../assets/images/profile.{webp,png,jpg,jpeg}', {
+  eager: true,
+  import: 'default',
+})
+const profilePhotoAvif = Object.values(avifModules)[0] ?? null
+const profilePhotoWebp = Object.values(webpModules)[0] ?? null
 
 const MENU = [
   { id: 'education', label: 'Education', side: 'left' },
@@ -68,17 +75,22 @@ function Stage({ onSelect }) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 120, damping: 18 }}
         >
-          {profilePhoto ? (
-            <img
-              className="stage__photo"
-              src={profilePhoto}
-              alt="Foto profil"
-              draggable="false"
-              width="749"
-              height="1358"
-              fetchPriority="high"
-              decoding="async"
-            />
+          {profilePhotoWebp ? (
+            <picture>
+              {profilePhotoAvif && (
+                <source srcSet={profilePhotoAvif} type="image/avif" />
+              )}
+              <img
+                className="stage__photo"
+                src={profilePhotoWebp}
+                alt="Foto profil"
+                draggable="false"
+                width="749"
+                height="1358"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
           ) : (
             <div className="stage__photo-placeholder">PHOTO</div>
           )}

@@ -1,13 +1,13 @@
-// Membuat src/assets/shot-sprite.webp: satu gambar yang sudah berisi cahaya
-// hangat, sinar menyebar, dan cincin merah dari efek tembakan, digambar SEKALI
-// di sini. Di web, ShotEffect.jsx hanya menampilkan satu <img> yang di-scale
-// dan di-fade — tidak ada conic-gradient atau mask yang dihitung ulang oleh
-// HP setiap kali efek muncul, karena itu penyebab utama macetnya animasi.
+// Membuat src/assets/shot-sprite.webp DAN shot-sprite.avif: satu gambar
+// yang sudah berisi cahaya hangat, sinar menyebar, dan cincin merah dari
+// efek tembakan, digambar SEKALI di sini. Di web, ShotEffect.jsx hanya
+// menampilkan satu <picture> (AVIF kalau didukung browser, WebP kalau
+// tidak) yang di-scale dan di-fade — tidak ada conic-gradient atau mask
+// yang dihitung ulang oleh HP setiap kali efek muncul.
 //
 // Jalankan ulang setelah mengubah warna/bentuknya:
 //   node scripts/build-shot-sprite.mjs
-import sharp from '/home/claude/.npm-global/lib/node_modules/sharp/lib/index.js'
-import { writeFileSync } from 'node:fs'
+import sharp from 'sharp' // perlu: npm install -D sharp
 import { fileURLToPath } from 'node:url'
 
 const SIZE = 560 // resolusi sumber (px); ditampilkan hingga ~560px di layar
@@ -67,10 +67,12 @@ const svg = `
 </svg>
 `.trim()
 
-const outPath = fileURLToPath(new URL('../src/assets/shot-sprite.webp', import.meta.url))
-await sharp(Buffer.from(svg), { density: 192 })
-  .resize(SIZE * 2, SIZE * 2)
-  .webp({ quality: 68, alphaQuality: 75 })
-  .toFile(outPath)
+const base = sharp(Buffer.from(svg), { density: 192 }).resize(SIZE * 2, SIZE * 2)
 
-console.log(`shot-sprite.webp: ${SIZE * 2}x${SIZE * 2}`)
+const webpPath = fileURLToPath(new URL('../src/assets/shot-sprite.webp', import.meta.url))
+const avifPath = fileURLToPath(new URL('../src/assets/shot-sprite.avif', import.meta.url))
+
+await base.clone().webp({ quality: 68, alphaQuality: 75 }).toFile(webpPath)
+await base.clone().avif({ quality: 45, effort: 6 }).toFile(avifPath)
+
+console.log(`shot-sprite.webp & shot-sprite.avif: ${SIZE * 2}x${SIZE * 2}`)
